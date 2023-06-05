@@ -7,6 +7,7 @@ screen_width = 601
 screen_height = 800
 clock = pygame.time.Clock()
 gamepad = pygame.display.set_mode((screen_width, screen_height))
+start_page = pygame.image.load('images/start_page.png')
 background = pygame.image.load('images/background.png')
 background2 = pygame.image.load('images/background2.png')
 jet = pygame.image.load('images/jet.png')
@@ -21,6 +22,13 @@ yellow_dragon = pygame.image.load('images/yellow_dragon.png')
 yellow_dragon_2 = pygame.image.load('images/yellow_dragon_2.png')
 yellow_dragon_animation = [yellow_dragon, yellow_dragon_2]
 explosion = pygame.image.load('images/explosion.png')
+press_one = pygame.image.load('images/press_one.png')
+press_two = pygame.image.load('images/press_two.png')
+press_three = pygame.image.load('images/press_three.png')
+press_four = pygame.image.load('images/press_four.png')
+press_animation = [press_one, press_two, press_three, press_four]
+# current_time = pygame.time.get_ticks()
+
 
 def runGame():
     # get_rect() 객체에 대한 사각형 영억을 만들어줌,
@@ -59,7 +67,7 @@ def runGame():
     enemy_index = random.randint(0, len(enemies) - 1)
     enemy_animation = enemy_animation[enemy_index]
     enemy_image = enemies[enemy_index]
-    animation_timer = pygame.time.get_ticks()
+
 
     # if enemy == red_dragon:
     #     # enemy_image = red_dragon
@@ -123,6 +131,7 @@ def runGame():
         gamepad.blit(jet, (x, y))
 
         # 총알 위치 지정
+        count = 0
         if len(bullet_xy) != 0:
             for i, bxy in enumerate(bullet_xy):
                 bxy[1] -= 15
@@ -130,8 +139,11 @@ def runGame():
                 if bxy[1] < enemy_y:
                     if bxy[0] > enemy_x and bxy[0] < enemy_x + enemy_width:
                         bullet_xy.remove(bxy)
-                        shot_dragon = True
+                        # shot_dragon = True
                         kill_dragon_count += 1
+                        count += 1
+                        if count == 3:
+                            shot_dragon = True
                 if bxy[1] <= 0: # bullet이 화면 밖을 벗어나면 지움
                     try:
                         bullet_xy.remove(bxy)
@@ -158,12 +170,13 @@ def runGame():
             enemy_image = enemies[enemy_index]
             enemy_x = random.randrange(0, screen_width - enemy_width)
             enemy_y = 0
+            animation_timer = pygame.time.get_ticks()
 
 
         # gamepad.blit(enemy_image[current_image], (enemy_x, enemy_y))
 
-
         current_time = pygame.time.get_ticks()
+
 
         if current_time - animation_timer >= 300:  # 1초마다 애니메이션 변경
             animation_timer = current_time
@@ -184,13 +197,30 @@ def runGame():
     quit()
 
 
+
 def main():
     pygame.init()
     # 타이틀 만들기
-    pygame.display.set_caption('다느니가 만든 게임')
+    pygame.display.set_caption('DRAGON STRIKER')
+    gamepad.blit(start_page,(0,0))
+    #
+    # press_timer = pygame.time.get_ticks()
+    # press_index = random.randint(0, len(press_animation) - 1)
+    # if current_time - press_timer >= 300:  # 1초마다 애니메이션 변경
+    #     press_timer = current_time
+    #     press_index = (press_index + 1) % len(press_animation)
+    #
+    # gamepad.blit(press_animation[press_index], (100, 100))
+    pygame.display.update()
+    crashed = False
+    while not crashed:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                crashed = True
+            if event.type == pygame.KEYDOWN:  # 만약 키가 눌리는 이벤트가 있다면
+                if event.key == pygame.K_SPACE:
+                    runGame()
 
-    runGame()
-
-
+    clock.tick(60)
 if __name__ == '__main__':
     main()
