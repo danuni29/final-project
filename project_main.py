@@ -27,7 +27,10 @@ press_two = pygame.image.load('images/press_two.png')
 press_three = pygame.image.load('images/press_three.png')
 press_four = pygame.image.load('images/press_four.png')
 press_animation = [press_one, press_two, press_three, press_four]
-# current_time = pygame.time.get_ticks()
+life1 = pygame.image.load('images/life1.png')
+life2 = pygame.image.load('images/life2.png')
+life3 = pygame.image.load('images/life3.png')
+
 
 
 def runGame():
@@ -67,6 +70,7 @@ def runGame():
     enemy_index = random.randint(0, len(enemies) - 1)
     enemy_animation = enemy_animation[enemy_index]
     enemy_image = enemies[enemy_index]
+    animation_timer = pygame.time.get_ticks()
 
 
     # if enemy == red_dragon:
@@ -138,11 +142,12 @@ def runGame():
                 bullet_xy[i][1] = bxy[1]
                 if bxy[1] < enemy_y:
                     if bxy[0] > enemy_x and bxy[0] < enemy_x + enemy_width:
-                        bullet_xy.remove(bxy)
+                        # bullet_xy.remove(bxy)
                         # shot_dragon = True
                         kill_dragon_count += 1
                         count += 1
-                        if count == 3:
+                        if count == 2:
+                            bullet_xy.remove(bxy)
                             shot_dragon = True
                 if bxy[1] <= 0: # bullet이 화면 밖을 벗어나면 지움
                     try:
@@ -170,7 +175,8 @@ def runGame():
             enemy_image = enemies[enemy_index]
             enemy_x = random.randrange(0, screen_width - enemy_width)
             enemy_y = 0
-            animation_timer = pygame.time.get_ticks()
+
+        # animation_timer = pygame.time.get_ticks()
 
 
         # gamepad.blit(enemy_image[current_image], (enemy_x, enemy_y))
@@ -190,6 +196,14 @@ def runGame():
 
         # 화면에 적 이미지 그리기
         gamepad.blit(enemy_animation[animation_index], (enemy_x, enemy_y))
+
+        # 생명 - 3번
+        #드래곤에 3번 닿으면 게임 끝
+        gamepad.blit(life1, (10, 10))
+        gamepad.blit(life2, (60, 10))
+        gamepad.blit(life3, (110, 10))
+
+
 
         pygame.display.update()
         clock.tick(60)  # 1초당 60프레임을 화면에 보여줌
