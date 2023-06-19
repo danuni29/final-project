@@ -30,6 +30,12 @@ press_animation = [press_one, press_two, press_three, press_four]
 life1 = pygame.image.load('images/life1.png')
 life2 = pygame.image.load('images/life2.png')
 life3 = pygame.image.load('images/life3.png')
+life = [life1, life2, life3]
+gameover = pygame.image.load('images/gameover.jpg')
+background_fall = pygame.image.load('images/background_fall.png')
+background_fall_2 = pygame.image.load('images/background_fall_2.png')
+booster = pygame.image.load('images/booster.png')
+
 
 
 
@@ -50,6 +56,11 @@ def runGame():
     background2_y = -screen_height
     # background3_y = 2 * screen_height
 
+    # booster_size = booster.get_rect().size
+    # booster_x = random.randrange(0, screen_width - booster_size[0])
+    # booster_y += 7
+    # gamepad.blit(booster, (booster_x, booster_y))
+
     x = screen_width * 0.05
     y = screen_height * 0.8
 
@@ -57,6 +68,7 @@ def runGame():
     shot_dragon = False
     kill_dragon_count = 0
     passed_dragon_count = 0
+    font = pygame.font.Font(None, 36)
 
     # 램덤으로 적 출현시키기
     # red_enemy = [red_dragon, red_dragon_2]
@@ -73,16 +85,6 @@ def runGame():
     animation_timer = pygame.time.get_ticks()
 
 
-    # if enemy == red_dragon:
-    #     # enemy_image = red_dragon
-    #     enemy_animation = red_dragon_animation
-    # elif enemy == white_dragon:
-    #     # enemy_image = white_dragon
-    #     enemy_animation = white_dragon_animation
-    # else:
-    #     # enemy_image = yellow_dragon
-    #     enemy_animation = yellow_dragon_animation
-
 
     # 적 출현 위치 정하기
     enemy_size = enemy_image.get_rect().size
@@ -93,18 +95,21 @@ def runGame():
 
     # times = pygame.time.Clock()
 
+    elapsed_time = 0  # 경과시간 초기화.. 이걸 계속 while문 안에 넣고있어서 0으로 나왔음 ;;
+    life_count = 3
+    booster_y = 0
 
     crashed = False
     while not crashed:
         for event in pygame.event.get():  # 이벤트 발생 여부에 따른 반복문
-            if event.type == pygame.QUIT:
-                crashed = True
+            # if event.type == pygame.QUIT:
+            #     crashed = True
 
             if event.type == pygame.KEYDOWN: # 만약 키가 눌리는 이벤트가 있다면
                 if event.key == pygame.K_LEFT:
-                    x_change = -5
+                    x_change = -10
                 elif event.key == pygame.K_RIGHT:
-                    x_change = 5
+                    x_change = 10
                 elif event.key == pygame.K_SPACE:
                     # missileSound.play
                     bullet_x = x + jet_width/2  # 비행기의 앞부분 중간에서 나가도록 잡아줌
@@ -117,8 +122,8 @@ def runGame():
         x += x_change
         gamepad.fill(white)
 
-        background_y += 2
-        background2_y += 2
+        background_y += 5
+        background2_y += 5
 
         if background_y == screen_height:
             background_y = -screen_height
@@ -144,10 +149,11 @@ def runGame():
                     if bxy[0] > enemy_x and bxy[0] < enemy_x + enemy_width:
                         # bullet_xy.remove(bxy)
                         # shot_dragon = True
-                        kill_dragon_count += 1
                         count += 1
+                        # bullet_xy.remove(bxy)
                         if count == 2:
                             bullet_xy.remove(bxy)
+                            kill_dragon_count += 1
                             shot_dragon = True
                 if bxy[1] <= 0: # bullet이 화면 밖을 벗어나면 지움
                     try:
@@ -161,12 +167,22 @@ def runGame():
 
         # 적이 날아오게 하기
         # 드래곤 색깔마다 다가오는 속도를 다르게함
-        if enemy_image == enemies[0]:
-            enemy_y += 7
-        elif enemy_image == enemies[1]:
-            enemy_y += 6
-        else:
-            enemy_y += 5
+        # if enemy_image == enemies[0]:
+        #     enemy_y += 7
+        # elif enemy_image == enemies[1]:
+        #     enemy_y += 6
+        # else:
+        #     enemy_y += 5
+        enemy_y += 7
+        #
+        # gamepad.blit(life1, (10, 10))
+        # gamepad.blit(life2, (60, 10))
+        # gamepad.blit(life3, (110, 10))
+
+        # booster_size = booster.get_rect().size
+        # booster_x = random.randrange(0, screen_width - booster_size[0])
+        # booster_y += 7
+        # gamepad.blit(booster, (booster_x, booster_y))
 
         if enemy_y > screen_height:
             enemy_animation = [red_dragon_animation, white_dragon_animation, yellow_dragon_animation]
@@ -175,11 +191,23 @@ def runGame():
             enemy_image = enemies[enemy_index]
             enemy_x = random.randrange(0, screen_width - enemy_width)
             enemy_y = 0
+            life_count -= 1
+            # booster_x = random.randrange(0, screen_width - booster_size[0])
+            # booster_y += 7
 
-        # animation_timer = pygame.time.get_ticks()
+        tao = font.render(f"LIFE: {life_count} ", True, (255, 255, 255))
+        gamepad.blit(tao, (10,10))
+
+        if life_count == 0:
+            crashed = True
+            gamepad.blit(gameover, (0, 0))
+            kill_dragon_count= font.render(f"{kill_dragon_count} ", True, (0, 0, 0))
+            gamepad.blit(kill_dragon_count, (300, 480))
+            elapsed_text = font.render("{:.2f} m".format(elapsed_time), True, (0, 0, 0))
+            gamepad.blit(elapsed_text, (230, 350))
 
 
-        # gamepad.blit(enemy_image[current_image], (enemy_x, enemy_y))
+
 
         current_time = pygame.time.get_ticks()
 
@@ -197,18 +225,29 @@ def runGame():
         # 화면에 적 이미지 그리기
         gamepad.blit(enemy_animation[animation_index], (enemy_x, enemy_y))
 
-        # 생명 - 3번
-        #드래곤에 3번 닿으면 게임 끝
-        gamepad.blit(life1, (10, 10))
-        gamepad.blit(life2, (60, 10))
-        gamepad.blit(life3, (110, 10))
+
+
+        # 초당 1m 가는 것 구현
+        dt = clock.tick(60) / 1000.0  # 경과 시간(초) 계산, (/1000.0) -> 밀리초를 초단위로 변경
+        elapsed_time += dt
+
+        if not crashed:
+            elapsed_text_1 = font.render("flight distance: ", True, (255, 255, 255))
+            elapsed_text = font.render("{:.2f} m".format(elapsed_time), True, (255, 255, 255))
+            gamepad.blit(elapsed_text_1, (screen_width - elapsed_text_1.get_width() - 100, 10))
+            gamepad.blit(elapsed_text, (screen_width - elapsed_text.get_width() - 10, 10))
+
+
+        if elapsed_time >= 20:
+            enemy_y += 8
+
 
 
 
         pygame.display.update()
         clock.tick(60)  # 1초당 60프레임을 화면에 보여줌
-    pygame.quit()
-    quit()
+    # pygame.quit()
+    # quit()
 
 
 
@@ -217,14 +256,7 @@ def main():
     # 타이틀 만들기
     pygame.display.set_caption('DRAGON STRIKER')
     gamepad.blit(start_page,(0,0))
-    #
-    # press_timer = pygame.time.get_ticks()
-    # press_index = random.randint(0, len(press_animation) - 1)
-    # if current_time - press_timer >= 300:  # 1초마다 애니메이션 변경
-    #     press_timer = current_time
-    #     press_index = (press_index + 1) % len(press_animation)
-    #
-    # gamepad.blit(press_animation[press_index], (100, 100))
+
     pygame.display.update()
     crashed = False
     while not crashed:
@@ -233,6 +265,7 @@ def main():
                 crashed = True
             if event.type == pygame.KEYDOWN:  # 만약 키가 눌리는 이벤트가 있다면
                 if event.key == pygame.K_SPACE:
+
                     runGame()
 
     clock.tick(60)
