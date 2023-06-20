@@ -75,12 +75,14 @@ class Button:
         return action
 
 
+
 def runGame():
     gameover_sound = pygame.mixer.Sound('sound/gameover_sound.mp3')
     explosion_sound = pygame.mixer.Sound('sound/explosion_sound.mp3')
     gun_sound = pygame.mixer.Sound('sound/gun_sound.mp3')
     first_background_music = pygame.mixer.Sound('sound/first_background_music.mp3')
     # pygame.mixer.music.load('sound/first_background_music.mp3')
+    death_sound = pygame.mixer.Sound('sound/death_sound.mp3')
 
     # get_rect() 객체에 대한 사각형 영억을 만들어줌,
     # size는 해당 사각형의 가로와 세로 크기를 튜플로 반환
@@ -130,11 +132,13 @@ def runGame():
 
     # times = pygame.time.Clock()
 
-    elapsed_time = 0  # 경과시간 초기화.. 이걸 계속 while문 안에 넣고있어서 0으로 나왔음 ;;
+    # 경과시간 초기화.. 이걸 계속 while문 안에 넣고있어서 0으로 나왔음 ;;
     life_count = 3
-    booster_fallen_time = 0
+    start_time = pygame.time.get_ticks() / 1000.0
+    start_time = 0
+    elapsed_time = 0
+    clock.tick(60)
 
-    item_get = False
     crashed = False
     quit_game = False
     while not quit_game:
@@ -162,7 +166,7 @@ def runGame():
         if life_count == 0:
             crashed = True
             gamepad.blit(gameover, (0, 0))
-            pygame.mixer.music.stop()
+            first_background_music.stop()
             # gameover_sound.play(1)
             kill_dragon_count_font = font.render(f"{kill_dragon_count} ", True, (0, 0, 0))
             gamepad.blit(kill_dragon_count_font, (300, 480))
@@ -179,6 +183,7 @@ def runGame():
                 print('hi')
                 life_count = 3
                 elapsed_time = 0
+
                 kill_dragon_count = 0
                 crashed = False
             elif exit_button.check_click():
@@ -234,9 +239,10 @@ def runGame():
             for bx, by in bullet_xy:
                 gamepad.blit(bullet_image, (bx, by))
 
-        enemy_y += 7
+        enemy_y += 5
 
         if enemy_y > screen_height:
+            death_sound.play()
             enemy_animation = [red_dragon_animation, white_dragon_animation, yellow_dragon_animation]
             enemy_index = random.randint(0, len(enemies) - 1)
             enemy_animation = enemy_animation[enemy_index]
@@ -272,17 +278,25 @@ def runGame():
         gamepad.blit(enemy_animation[animation_index], (enemy_x, enemy_y))
 
         # 초당 1m 가는 것 구현
-        dt = clock.tick(60) / 1000.0  # 경과 시간(초) 계산, (/1000.0) -> 밀리초를 초단위로 변경
-        elapsed_time += dt
+        # current_time = pygame.time.get_ticks() / 1000.0
+        # dt = clock.tick(60) / 1000.0  # 경과 시간(초) 계산, (/1000.0) -> 밀리초를 초단위로 변경
+        # elapsed_time += dt
+        # elapsed_time = (current_time - start_time)
 
         if not crashed:
+
+            dt = clock.tick(60) / 1000.0  # 경과 시간(초) 계산, (/1000.0) -> 밀리초를 초단위로 변경
+            elapsed_time += dt
+
             elapsed_text_1 = font.render("flight distance: ", True, (255, 255, 255))
             elapsed_text = font.render("{:.2f} m".format(elapsed_time), True, (255, 255, 255))
             gamepad.blit(elapsed_text_1, (screen_width - elapsed_text_1.get_width() - 100, 10))
             gamepad.blit(elapsed_text, (screen_width - elapsed_text.get_width() - 10, 10))
 
         if elapsed_time >= 20:
-            enemy_y += 8
+            enemy_y += 7
+
+
 
         pygame.display.update()
         clock.tick(60)  # 1초당 60프레임을 화면에 보여줌
@@ -297,6 +311,7 @@ def runGame():
 
 
 def main():
+
     pygame.init()
     # 타이틀 만들기
     pygame.display.set_caption('DRAGON STRIKER')
@@ -315,6 +330,7 @@ def main():
             if event.type == pygame.KEYDOWN:  # 만약 키가 눌리는 이벤트가 있다면
                 if event.key == pygame.K_SPACE:
                     runGame()
+                    elapsed_time = 0
                     return
                 elif event.key == pygame.K_LEFT:
                     gamepad.blit(howtoplay, (0, 0))
